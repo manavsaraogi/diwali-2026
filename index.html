@@ -354,6 +354,10 @@ button.dec{cursor:pointer}
 #fireTag{font-size:16px;font-weight:500;font-style:italic;color:var(--gold1);min-height:26px}
 .boom{min-height:84px;display:grid;place-items:center;font:900 22px/1.3 var(--head);white-space:pre-line;background:var(--gold);-webkit-background-clip:text;background-clip:text;color:transparent}
 .boom.cdn{font-size:54px}
+.lucky{width:100%;display:grid;grid-template-columns:repeat(10,1fr);gap:4px;max-height:132px;overflow-y:auto;padding:4px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.25)}
+.lucky button{min-height:30px;font:700 11px var(--head);color:var(--gold1);border:1px solid var(--line);border-radius:8px}
+.lucky button[aria-pressed="true"]{background:var(--gold);color:#241705;border-color:transparent}
+.lucky button:disabled{opacity:.25;text-decoration:line-through;cursor:not-allowed}
 .songs{width:100%;display:flex;flex-direction:column;gap:8px;text-align:left}
 .songs div{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;font-size:13.5px;background:rgba(0,0,0,.25)}
 .songs div i{font-style:normal;font:700 11px var(--head);color:var(--gold2);width:22px}
@@ -632,6 +636,10 @@ body.dm #phul{opacity:0}
       <div class="step"><button id="minus" aria-label="One fewer">−</button><b id="partyN">0</b><button id="plus" aria-label="One more">+</button></div>
       <p class="sub" id="partyTx">Just you. Brave.</p>
       <input class="field" id="guests" type="text" maxlength="80" placeholder="Their names (optional)" aria-label="Names of the people coming with you" hidden>
+      <div class="orn">✦</div>
+      <p class="sub" style="margin-top:-6px">Pick your <b>Lucky Draw number</b> (1–100)</p>
+      <div class="lucky" id="luckyGrid" role="group" aria-label="Lucky draw number"></div>
+      <p class="sub" id="luckyTx" style="font-size:12px">No number picked yet.</p>
       <button class="btn full pulse" id="lock">Lock it in 🔒</button>
       <button class="link" id="changeAns">← change my answer</button>
     </div>
@@ -805,9 +813,9 @@ const store = {
   set(v) { try { localStorage.setItem(KEY, JSON.stringify(v)) } catch {} },
   clear() { try { localStorage.removeItem(KEY) } catch {} }
 };
-let S = Object.assign({ guests: '', name: '', aura: '', song: '', fate: null, mission: null, rsvp: '', party: 0, confirmed: false, decoded: false }, store.get());
+let S = Object.assign({ guests: '', name: '', aura: '', song: '', fate: null, mission: null, rsvp: '', party: 0, lucky: 0, confirmed: false, decoded: false }, store.get());
 const save = () => store.set(S);
-let remote = { guests: [], songs: [], taken: [] };
+let remote = { guests: [], songs: [], lucky: [] };
 
 /* =============== UTIL =============== */
 let tt;
@@ -821,9 +829,9 @@ function post(payload) {
   fetch(CONFIG.endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) }).catch(() => {});
 }
 function loadRemote() {
-  if (!CONFIG.endpoint) return;
-  fetch(CONFIG.endpoint + (CONFIG.endpoint.includes('?') ? '&' : '?') + 'action=wall').then(r => r.json()).then(d => {
-    remote = Object.assign(remote, d || {});
+  if (!CONFIG.endpoint) return Promise.resolve();
+  return fetch(CONFIG.endpoint + (CONFIG.endpoint.includes('?') ? '&' : '?') + 'action=wall').then(r => r.json()).then(d => {
+    remote = Object.assign(remote, d || {}); if (typeof luckyUI === 'function') luckyUI();
   }).catch(() => {});
 }
 
@@ -1270,10 +1278,22 @@ function partyUI() {
 $('#minus').onclick = () => { S.party = Math.max(0, S.party - 1); partyUI(); Snd.tick(); };
 $('#plus').onclick = () => { S.party = Math.min(6, S.party + 1); partyUI(); Snd.tick(); };
 $('#guests').addEventListener('input', e => { S.guests = e.target.value.trim(); save(); });
-$('#lock').onclick = () => {
+const luckyGrid = $('#luckyGrid');
+for (let n = 1; n <= 100; n++) { const b = document.createElement('button'); b.textContent = n; b.dataset.n = n; b.setAttribute('aria-pressed', 'false'); luckyGrid.appendChild(b); }
+const luckyTaken = () => new Set((remote.lucky || []).filter(x => String(x.name).toLowerCase() !== (S.name || '').toLowerCase()).map(x => Number(x.no)));
+function luckyUI() {
+  const t = luckyTaken();
+  $$('button', luckyGrid).forEach(b => { const n = Number(b.dataset.n); b.disabled = t.has(n); b.setAttribute('aria-pressed', String(n === S.lucky)); });
+  $('#luckyTx').textContent = S.lucky ? 'Your lucky number: ' + S.lucky : 'No number picked yet.';
+}
+luckyGrid.onclick = e => { const b = e.target.closest('button'); if (!b || b.disabled) return; S.lucky = Number(b.dataset.n); save(); luckyUI(); Snd.tick(); };
+$('#lock').onclick = async () => {
+  if (!S.lucky) { toast('Pick your lucky draw number first 🎟️'); return; }
+  await loadRemote();
+  if (luckyTaken().has(S.lucky)) { toast('Someone just took that number. Pick another!'); S.lucky = 0; save(); luckyUI(); return; }
   if (S.mission == null) S.mission = Math.floor(Math.random() * MISSIONS.length);
   S.confirmed = true; save();
-  post({ type: 'rsvp', name: S.name, aura: S.aura, song: S.song, fate: S.fate != null ? FATES[S.fate][1] : '', rsvp: S.rsvp, party: S.party, guests: S.guests || '' });
+  post({ type: 'rsvp', name: S.name, aura: S.aura, song: S.song, fate: S.fate != null ? FATES[S.fate][1] : '', rsvp: S.rsvp, party: S.party, guests: S.guests || '', lucky: S.lucky });
   flashScreen(); Snd.boom(true); go(8);
 };
 
@@ -1289,7 +1309,7 @@ function qrSVG(seed) {
   for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) if (g[i][j]) s += `<rect x="${j}" y="${i}" width="1.02" height="1.02"/>`;
   return s + '</g><text x="12.5" y="14.4" text-anchor="middle" font-size="4.2">🪔</text></svg>';
 }
-function luckyNo() { return 'LD-' + String(1000 + hash('lucky' + (S.name || 'guest').toLowerCase()) % 9000); }
+function luckyNo() { return S.lucky ? '#' + S.lucky : '—'; }
 function renderPass() {
   $('#pName').textContent = S.name || 'Guest'; $('#pDate').textContent = EVENT.start.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
   $('#pAura').textContent = S.aura ? AURAS[S.aura].tag : 'Wild card'; $('#pParty').textContent = S.party ? `You + ${S.party}` : 'Just you';
@@ -1385,7 +1405,7 @@ function enterFinal() {
   if (S.aura && AURAS[S.aura]) setAura(S.aura);
   if (S.song) songEl.value = S.song;
   if (S.fate != null) { renderFate(); $('#fateBtn').textContent = 'REVEAL AGAIN 🔮'; }
-  S.party = S.party || 0; partyUI();
+  S.party = S.party || 0; partyUI(); luckyUI();
 })();
 /* =============== PHULJARI CURSOR =============== */
 const phul = $('#phul');
