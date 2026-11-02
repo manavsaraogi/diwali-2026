@@ -663,6 +663,8 @@ body.dm #phul{opacity:0}
         </div>
         <div class="lbl">Dress Code</div><div class="val">Ethnic. Go all out 🥻</div>
         <div class="lbl">Fate</div><div class="val" id="pFate">—</div>
+        <div class="lbl">Lucky Draw No.</div><div class="val" id="pLucky">—</div>
+        <div class="lbl" style="letter-spacing:.08em;text-transform:none">📸 Screenshot this pass. You need it to claim the prize.</div>
         <div class="lbl">Status</div><div class="val" id="pRsvp">—</div>
         <div class="lbl">Secret Mission</div>
         <div id="pMission"><button class="dec" id="decrypt">🔓 TAP TO DECRYPT</button></div>
@@ -787,7 +789,7 @@ const FATES = [
   ['🃏', 'THE CARD SHARK', 'Calm face. Cold eyes. Everyone’s ₹100 notes will be yours.'],
   ['🍛', 'THE SNACK STRATEGIST', 'You know exactly when the fresh batch lands.']
 ];
-const TNC = ['Dance without shame', 'Eat excessively', 'Compliment the host', 'Stay till the last song', 'Pretend you’re not taking 300 photos', 'Absolutely no “I’ll leave early”'];
+const TNC = ['Dance without shame', 'Eat excessively', 'Compliment the host', 'Stay till the last song', 'Pretend you’re not taking 300 photos', 'Absolutely no “I’ll leave early”', 'Screenshot your RSVP pass to claim your lucky draw prize'];
 const PHATAKA = {
   anaar: 'WHOOSH.\nYou’ll glow differently tonight.',
   ladi: 'POP POP POP.\nYour chaos has been scheduled.',
@@ -1287,11 +1289,13 @@ function qrSVG(seed) {
   for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) if (g[i][j]) s += `<rect x="${j}" y="${i}" width="1.02" height="1.02"/>`;
   return s + '</g><text x="12.5" y="14.4" text-anchor="middle" font-size="4.2">🪔</text></svg>';
 }
+function luckyNo() { return 'LD-' + String(1000 + hash('lucky' + (S.name || 'guest').toLowerCase()) % 9000); }
 function renderPass() {
   $('#pName').textContent = S.name || 'Guest'; $('#pDate').textContent = EVENT.start.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
   $('#pAura').textContent = S.aura ? AURAS[S.aura].tag : 'Wild card'; $('#pParty').textContent = S.party ? `You + ${S.party}` : 'Just you';
   $('#pFate').textContent = S.fate != null ? FATES[S.fate][0] + ' ' + FATES[S.fate][1] : 'Unrevealed';
   $('#pRsvp').textContent = S.rsvp || '—';
+  $('#pLucky').textContent = luckyNo();
   $('#pNo').textContent = 'DW-' + String(hash((S.name || 'guest') + S.rsvp) % 10000).padStart(4, '0');
   $('#qr').innerHTML = qrSVG((S.name || 'guest') + '|' + S.rsvp + '|' + (S.aura || ''));
   if (S.decoded && S.mission != null) showMission(); else $('#pMission').innerHTML = '<button class="dec" id="decrypt">🔓 TAP TO DECRYPT</button>';
@@ -1364,6 +1368,7 @@ function waLink() {
   const lines = ['🪔 *Diwali 2026: Lights & Chaos* — RSVP', `*${S.name || 'Guest'}*: ${S.rsvp}`,
     `Coming with: ${S.party ? S.party + (S.guests ? ' (' + S.guests + ')' : '') : 'just me'}`];
   if (S.aura) lines.push('Aura: ' + AURAS[S.aura].tag);
+  lines.push('Lucky draw no: ' + luckyNo());
   if (S.song) lines.push('Song: ' + S.song);
   return 'https://wa.me/' + (CONFIG.whatsapp || '') + '?text=' + encodeURIComponent(lines.join('\n'));
 }
