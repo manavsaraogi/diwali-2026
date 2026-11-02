@@ -304,6 +304,7 @@ h3{font-size:17px;letter-spacing:.14em}
 .big{font-size:clamp(32px,10vw,46px);letter-spacing:.03em}
 .yr{font:700 13px var(--head);letter-spacing:.7em;color:var(--gold1);padding-left:.7em}
 .tag{font-size:15px;line-height:1.6;color:var(--muted);font-weight:300}
+@media print{html,body{height:auto!important;overflow:visible!important;background:#0b0a09!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}body>*:not(#book){display:none!important}.page:not(.on){display:none!important}.page{position:static!important;overflow:visible!important;height:auto!important}#back,#sound,#pdfBtn,#waBtn,.notice,.mod,#share,#restart,.big,.yr,.tag{display:none!important}}
 .pass{width:100%;border-radius:22px;background:linear-gradient(160deg,#1f170b,#0f0c08);border:1.5px solid var(--gold2);box-shadow:0 24px 70px rgba(0,0,0,.65),0 0 60px rgba(207,160,67,.2);overflow:hidden;text-align:left;position:relative}
 .pass::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,229,153,.1) 48%,transparent 60%);transform:translateX(-100%);animation:sheen 5s ease-in-out 1.5s infinite;pointer-events:none}
 @keyframes sheen{0%,50%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
@@ -679,6 +680,7 @@ body.dm #phul{opacity:0}
         <a class="btn full" id="pMap" href="https://maps.app.goo.gl/VvkY1iz8Z15ZN5yT8" target="_blank" rel="noopener">📍 Take me to the venue</a>
       </div>
     </div>
+    <button class="btn ghost full" id="pdfBtn">⬇️ Save my pass as PDF</button>
     <a class="btn full" id="waBtn" target="_blank" rel="noopener">💬 Send my RSVP on WhatsApp</a>
     <div class="notice">IMPORTANT NOTICE: Bring plenty of physical cash—specifically ₹50 and ₹100 notes for card games and festive bets!</div>
 
@@ -1382,6 +1384,24 @@ $$('#fire button').forEach(b => b.onclick = async () => {
   bm.className = 'boom'; phataka(b.dataset.f, r.left + r.width / 2, b.dataset.f === 'rocket' ? r.top : r.top + 10);
   await wait(250); bm.textContent = PHATAKA[b.dataset.f]; bm.classList.remove('pop'); void bm.offsetWidth; bm.classList.add('pop'); busyF = false;
 });
+/* save the pass as a PDF: html-to-image + jsPDF are loaded from a CDN on the first tap; falls back to the print dialog */
+const loadJS = src => new Promise((ok, no) => { const el = document.createElement('script'); el.src = src; el.onload = ok; el.onerror = no; document.head.appendChild(el); });
+$('#pdfBtn').onclick = async () => {
+  const btn = $('#pdfBtn'), label = btn.textContent; btn.disabled = true; btn.textContent = 'Making your PDF…';
+  try {
+    if (!window.htmlToImage) await loadJS('https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js');
+    if (!window.jspdf) await loadJS('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    const url = await htmlToImage.toJpeg($('#pass'), { quality: .95, pixelRatio: 2, backgroundColor: '#0b0a09', cacheBust: true });
+    const img = new Image(); await new Promise((ok, no) => { img.onload = ok; img.onerror = no; img.src = url; });
+    const pw = 400, ih = Math.round((pw - 40) * img.height / img.width), ph = ih + 40;
+    const pdf = new jspdf.jsPDF({ unit: 'pt', format: [pw, ph] });
+    pdf.setFillColor(11, 10, 9); pdf.rect(0, 0, pw, ph, 'F');
+    pdf.addImage(url, 'JPEG', 20, 20, pw - 40, ih);
+    pdf.save('Diwali-2026-Pass-' + (S.name || 'Guest').replace(/[^\w]+/g, '-') + '.pdf');
+    toast('PDF saved 📄');
+  } catch (e) { toast('Opening print… choose “Save as PDF”'); window.print(); }
+  btn.disabled = false; btn.textContent = label;
+};
 $('#share').onclick = async () => {
   const text = `${S.name || 'I'} is going to Diwali 2026: Lights & Chaos 🪔 ${dateLong()}, 8:00 PM onwards at ${VENUE}. Aura: ${S.aura || 'wild card'}.`;
   try { if (navigator.share) await navigator.share({ title: 'Diwali 2026: Lights & Chaos', text }); else { await navigator.clipboard.writeText(text); toast('Copied to clipboard ✨'); } } catch {}
