@@ -563,11 +563,7 @@ body.dm #phul{opacity:0}
     <div class="auraCard" id="auraCard" hidden><small>Your Diwali aura</small><div class="an" id="auraName"></div><div class="ad">Dress accordingly. No excuses.</div></div>
     <div class="orn">✦</div>
     <h3>YOUR DIWALI DRESS CODE</h3>
-    <p class="sub">Tap <b>GENERATE MY LOOK</b></p>
-    <div class="look" id="look" aria-live="polite"><span class="ph">Your colours are waiting…</span></div>
-    <button class="btn full" id="genLook">GENERATE MY LOOK</button>
-    <button class="btn ghost full" id="lockLook" hidden>🔒 Lock this colour</button>
-    <p class="sub" id="lockNote" style="font-size:12px" hidden>Lock your colour so everyone doesn’t show up in the same shade.</p>
+    <div class="look" id="look"><div><div class="t">🥻 Wear ethnic. Go all out.</div><div class="q">“Sarees, sherwanis, kurtas, lehengas. If it shimmers, it’s invited. If it’s a hoodie, it’s not.”</div></div></div>
     <button class="btn ghost full" data-next>Next page →</button>
   </div></div>
 </section>
@@ -640,15 +636,6 @@ body.dm #phul{opacity:0}
       <div class="step"><button id="minus" aria-label="One fewer">−</button><b id="partyN">0</b><button id="plus" aria-label="One more">+</button></div>
       <p class="sub" id="partyTx">Just you. Brave.</p>
       <input class="field" id="guests" type="text" maxlength="80" placeholder="Their names (optional)" aria-label="Names of the people coming with you" hidden>
-      <div class="orn">✦</div>
-      <p class="sub" style="margin-top:-6px">What are you eating? <b>(helps the host)</b></p>
-      <div class="pills" id="diet" role="group" aria-label="Food preference">
-        <button class="pill" data-d="Veg" aria-pressed="false">🥗 Veg</button>
-        <button class="pill" data-d="Non-veg" aria-pressed="false">🍗 Non-veg</button>
-        <button class="pill" data-d="Jain" aria-pressed="false">🌿 Jain</button>
-        <button class="pill" data-d="Vegan" aria-pressed="false">🌱 Vegan</button>
-      </div>
-      <input class="field" id="allergy" type="text" maxlength="60" placeholder="Allergies? (optional)" aria-label="Allergies">
       <button class="btn full pulse" id="lock">Lock it in 🔒</button>
       <button class="link" id="changeAns">← change my answer</button>
     </div>
@@ -678,7 +665,7 @@ body.dm #phul{opacity:0}
           <div><div class="lbl">Diwali Aura</div><div class="val" id="pAura">—</div></div>
           <div><div class="lbl">Party</div><div class="val" id="pParty">—</div></div>
         </div>
-        <div class="lbl">Your Colours</div><div class="val" id="pLook">—</div>
+        <div class="lbl">Dress Code</div><div class="val">Ethnic. Go all out 🥻</div>
         <div class="lbl">Fate</div><div class="val" id="pFate">—</div>
         <div class="lbl">Status</div><div class="val" id="pRsvp">—</div>
         <div class="lbl">Secret Mission</div>
@@ -792,21 +779,6 @@ const AURAS = {
   '🖤 Midnight Luxe': { tag: 'MIDNIGHT LUXE 🖤' },
   '✨ Bollywood Main Character': { tag: 'MAIN CHARACTER ✨' }
 };
-const PALETTES = [
-  { n: 'Plum + Gold', c: ['#6b2a6e', '#d4a843'], e: '💜', q: 'Think old-money Diwali. Think jewellery. Think you own the haveli.', a: ['👑 Royal Maharaja', '🔥 Desi Glam'] },
-  { n: 'Blush Pink + Silver', c: ['#f2b8c6', '#c9cdd4'], e: '🩷', q: 'Soft glam. But make it expensive.', a: ['🌸 Pastel Princess', '✨ Bollywood Main Character'] },
-  { n: 'Emerald + Antique Gold', c: ['#0f7a58', '#b98a2e'], e: '💚', q: 'Rich, regal and impossible to ignore.', a: ['👑 Royal Maharaja', '🔥 Desi Glam'] },
-  { n: 'Midnight Navy + Silver', c: ['#14234d', '#c4c8d0'], e: '💙', q: 'The night sky, tailored.', a: ['🖤 Midnight Luxe', '👑 Royal Maharaja'] },
-  { n: 'Black + Gold', c: ['#16130f', '#d4a843'], e: '🖤', q: 'One hit of gold. Maximum mystery.', a: ['🖤 Midnight Luxe', '🪩 Disco Diwali'] },
-  { n: 'Ruby Red + Gold', c: ['#a3122b', '#d4a843'], e: '❤️', q: 'Classic. Loud. Unapologetic.', a: ['🔥 Desi Glam', '✨ Bollywood Main Character'] },
-  { n: 'Burnt Orange + Copper', c: ['#d1561b', '#b4693a'], e: '🧡', q: 'You are the diya. Glow accordingly.', a: ['🔥 Desi Glam'] },
-  { n: 'Powder Blue + Pearl', c: ['#a9c7e6', '#f1ece2'], e: '🤍', q: 'Dreamy, soft and dangerously photogenic.', a: ['🌸 Pastel Princess'] },
-  { n: 'Hot Pink + Sequin Silver', c: ['#e0307f', '#d6d9e0'], e: '💗', q: 'Subtle was cancelled.', a: ['🪩 Disco Diwali', '✨ Bollywood Main Character'] },
-  { n: 'Electric Violet + Mirror', c: ['#7a2cf0', '#e4e7ee'], e: '🪩', q: 'If it doesn’t catch the light, it doesn’t come.', a: ['🪩 Disco Diwali'] },
-  { n: 'Champagne + Rose Gold', c: ['#ecd9b0', '#c98a7d'], e: '🥂', q: 'Slow-motion entrance. Wind machine not included.', a: ['✨ Bollywood Main Character', '🌸 Pastel Princess'] },
-  { n: 'Peacock Teal + Gold', c: ['#0b6e7a', '#d4a843'], e: '🦚', q: 'Walk in like the chandeliers rise for you.', a: ['👑 Royal Maharaja', '✨ Bollywood Main Character'] },
-  { n: 'Charcoal + Rose Gold', c: ['#33302d', '#c98a7d'], e: '🤎', q: 'Understated power. The room notices anyway.', a: ['🖤 Midnight Luxe'] }
-];
 const MISSIONS = [
   [47, 'Get someone to do a Bollywood dance with you.'],
   [21, 'Take a picture with someone you’ve never met.'],
@@ -842,7 +814,7 @@ const store = {
   set(v) { try { localStorage.setItem(KEY, JSON.stringify(v)) } catch {} },
   clear() { try { localStorage.removeItem(KEY) } catch {} }
 };
-let S = Object.assign({ diet: '', guests: '', allergy: '', name: '', aura: '', pal: null, locked: false, song: '', fate: null, mission: null, rsvp: '', party: 0, confirmed: false, prize: null, decoded: false }, store.get());
+let S = Object.assign({ guests: '', name: '', aura: '', song: '', fate: null, mission: null, rsvp: '', party: 0, confirmed: false, prize: null, decoded: false }, store.get());
 const save = () => store.set(S);
 let remote = { guests: [], songs: [], taken: [] };
 
@@ -1251,35 +1223,6 @@ function setAura(a) {
   $$('.pill', pillsEl).forEach(p => p.setAttribute('aria-pressed', String(p.textContent === a)));
   const c = $('#auraCard'); c.hidden = false; $('#auraName').textContent = AURAS[a].tag; c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop');
 }
-function renderLook() {
-  const el = $('#look'); el.innerHTML = '';
-  if (S.pal == null) { el.innerHTML = '<span class="ph">Your colours are waiting…</span>'; return; }
-  const p = PALETTES[S.pal], w = document.createElement('div');
-  w.innerHTML = '<div class="sw"><i></i><i></i></div><div class="t"></div><div class="q"></div>';
-  const [s1, s2] = $$('.sw i', w); s1.style.background = p.c[0]; s2.style.background = p.c[1];
-  $('.t', w).textContent = p.e + ' ' + p.n; $('.q', w).textContent = '“' + p.q + '”';
-  el.appendChild(w);
-  if (S.locked) { const l = document.createElement('span'); l.className = 'lk'; l.textContent = '🔒 LOCKED'; el.appendChild(l); }
-  el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
-  $('#lockLook').hidden = false; $('#lockNote').hidden = false;
-  $('#lockLook').textContent = S.locked ? '🔓 Unlock to change' : '🔒 Lock this colour';
-  $('#genLook').disabled = S.locked;
-  $('#genLook').textContent = S.pal == null ? 'GENERATE MY LOOK' : 'GENERATE AGAIN';
-}
-$('#genLook').onclick = () => {
-  if (S.locked) return;
-  const takenN = new Set(remote.taken || []);
-  let pool = PALETTES.map((p, i) => i).filter(i => i !== S.pal && !takenN.has(PALETTES[i].n));
-  const byAura = pool.filter(i => PALETTES[i].a.includes(S.aura));
-  if (byAura.length) pool = byAura;
-  if (!pool.length) pool = PALETTES.map((p, i) => i);
-  S.pal = pick(pool); save(); renderLook(); sparkBurst(24); Snd.chime();
-};
-$('#lockLook').onclick = () => {
-  if (!S.locked && remote.taken && remote.taken.includes(PALETTES[S.pal].n)) { toast('Someone just locked that shade. Generate again!'); return; }
-  S.locked = !S.locked; save(); renderLook();
-  if (S.locked) { toast('Colour locked 🔒 No twins at this party'); Snd.stamp(); sparkBurst(20); }
-};
 
 /* =============== PAGE 5 · SONG =============== */
 const songEl = $('#song'), vinyl = $('#vinyl');
@@ -1335,13 +1278,11 @@ function partyUI() {
 }
 $('#minus').onclick = () => { S.party = Math.max(0, S.party - 1); partyUI(); Snd.tick(); };
 $('#plus').onclick = () => { S.party = Math.min(6, S.party + 1); partyUI(); Snd.tick(); };
-$$('#diet .pill').forEach(b => b.onclick = () => { S.diet = S.diet === b.dataset.d ? '' : b.dataset.d; save(); $$('#diet .pill').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.d === S.diet))); Snd.tick(); });
 $('#guests').addEventListener('input', e => { S.guests = e.target.value.trim(); save(); });
-$('#allergy').addEventListener('input', e => { S.allergy = e.target.value.trim(); save(); });
 $('#lock').onclick = () => {
   if (S.mission == null) S.mission = Math.floor(Math.random() * MISSIONS.length);
   S.confirmed = true; save();
-  post({ type: 'rsvp', name: S.name, aura: S.aura, look: S.pal != null ? PALETTES[S.pal].n : '', locked: S.locked, song: S.song, fate: S.fate != null ? FATES[S.fate][1] : '', rsvp: S.rsvp, party: S.party, guests: S.guests || '', diet: S.diet || '', allergy: S.allergy || '' });
+  post({ type: 'rsvp', name: S.name, aura: S.aura, song: S.song, fate: S.fate != null ? FATES[S.fate][1] : '', rsvp: S.rsvp, party: S.party, guests: S.guests || '' });
   flashScreen(); Snd.boom(true); go(8);
 };
 
@@ -1360,8 +1301,6 @@ function qrSVG(seed) {
 function renderPass() {
   $('#pName').textContent = S.name || 'Guest'; $('#pDate').textContent = EVENT.start.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
   $('#pAura').textContent = S.aura ? AURAS[S.aura].tag : 'Wild card'; $('#pParty').textContent = S.party ? `You + ${S.party}` : 'Just you';
-  const lk = $('#pLook'); lk.innerHTML = '';
-  if (S.pal != null) { const p = PALETTES[S.pal]; lk.innerHTML = '<span class="minisw"><i></i><i></i></span><span></span>'; const [a, b] = $$('.minisw i', lk); a.style.background = p.c[0]; b.style.background = p.c[1]; lk.lastChild.textContent = p.n + (S.locked ? ' 🔒' : ''); } else lk.textContent = 'Surprise me';
   $('#pFate').textContent = S.fate != null ? FATES[S.fate][0] + ' ' + FATES[S.fate][1] : 'Unrevealed';
   $('#pRsvp').textContent = S.rsvp || '—';
   $('#pNo').textContent = 'DW-' + String(hash((S.name || 'guest') + S.rsvp) % 10000).padStart(4, '0');
@@ -1461,9 +1400,7 @@ $('#restart').onclick = () => { if (!confirm('Reset your passport and start over
 function waLink() {
   const lines = ['🪔 *Diwali 2026: Lights & Chaos* — RSVP', `*${S.name || 'Guest'}*: ${S.rsvp}`,
     `Coming with: ${S.party ? S.party + (S.guests ? ' (' + S.guests + ')' : '') : 'just me'}`];
-  if (S.diet || S.allergy) lines.push('Food: ' + [S.diet, S.allergy && 'allergy: ' + S.allergy].filter(Boolean).join(', '));
   if (S.aura) lines.push('Aura: ' + AURAS[S.aura].tag);
-  if (S.pal != null) lines.push('Colours: ' + PALETTES[S.pal].n + (S.locked ? ' 🔒' : ''));
   if (S.song) lines.push('Song: ' + S.song);
   return 'https://wa.me/' + (CONFIG.whatsapp || '') + '?text=' + encodeURIComponent(lines.join('\n'));
 }
@@ -1479,7 +1416,6 @@ function enterFinal() {
 (function restore() {
   nameEl.value = S.name || '';
   if (S.aura && AURAS[S.aura]) setAura(S.aura);
-  if (S.pal != null) renderLook();
   if (S.song) songEl.value = S.song;
   if (S.fate != null) { renderFate(); $('#fateBtn').textContent = 'REVEAL AGAIN 🔮'; }
   S.party = S.party || 0; partyUI();
