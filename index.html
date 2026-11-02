@@ -783,8 +783,6 @@ const CONFIG = {
 const EVENT = { start: new Date(2026, 10, 4, 20, 0), hours: 5 };   // Wednesday 4 Nov 2026, 8:00 PM (local time)
 const MAP = 'https://maps.app.goo.gl/VvkY1iz8Z15ZN5yT8';
 const VENUE = 'Mavaza the Penthouse';
-const YT_START = 37;           // seconds: music starts (and loops back to) this point
-const YT_ID = '7sSE6eLiTpI';   // background music (YouTube)
 
 const AURAS = {
   '🪩 Disco Diwali': { tag: 'DISCO DAZZLE 🪩' },
@@ -943,43 +941,29 @@ const Snd = {
   tick() { if (!this.ok()) return; this.noise(this.c.currentTime, .03, 'highpass', 3000, 6000, .25); },
   stamp() { if (!this.ok()) return; this.thump(this.c.currentTime, 70, .6, .2); }
 };
-/* background music: YouTube IFrame player. Loaded on the first tap, played inside the ENTER tap (browser autoplay rules),
+/* background music: looping <audio> clip (party-clip.mp3). Played inside the ENTER tap (browser autoplay rules),
    with a visible "tap to play" pill if the browser still blocks it, and the built-in synth as a last resort. */
 const Music = {
-  p: null, ready: false, loading: false, want: false, fell: false,
+  p: null, ready: false, want: false, fell: false,
   load() {
-    if (this.loading) return; this.loading = true;
-    const host = document.createElement('div'); host.id = 'yt';
-    host.style.cssText = 'position:fixed;left:0;top:0;width:200px;height:200px;opacity:.01;pointer-events:none;z-index:-1';
-    host.innerHTML = '<div id="ytp"></div>'; document.body.appendChild(host);
-    const make = () => { this.p = new YT.Player('ytp', { width: 200, height: 200, videoId: YT_ID,
-      playerVars: Object.assign({ autoplay: 0, controls: 0, start: YT_START, playsinline: 1, rel: 0, modestbranding: 1, enablejsapi: 1 }, /^https?:$/.test(location.protocol) ? { origin: location.origin } : {}),
-      events: {
-        onReady: e => { this.ready = true; e.target.setVolume(75); if (this.want) this.play(); },
-        onStateChange: e => {
-          if (e.data === 1) { this.hidePill(); }
-          if (e.data === 0) { e.target.seekTo(YT_START, true); e.target.playVideo(); }
-        },
-        onError: ev => { console.warn('YouTube error', ev.data); this.fallback(!/^https?:$/.test(location.protocol) ? 'Open the hosted (https) link to hear the song' : ''); } } }); };
-    if (window.YT && YT.Player) make();
-    else {
-      window.onYouTubeIframeAPIReady = make;
-      const sc = document.createElement('script'); sc.src = 'https://www.youtube.com/iframe_api'; sc.onerror = () => this.fallback(); document.head.appendChild(sc);
-      setTimeout(() => { if (!this.ready) this.fallback(); }, 9000);
-    }
+    if (this.p) return;
+    const a = this.p = new Audio('party-clip.mp3'); a.loop = true; a.preload = 'auto'; a.volume = .75; a.muted = Snd.muted;
+    a.addEventListener('playing', () => this.hidePill());
+    a.addEventListener('error', () => this.fallback());
+    this.ready = true;
   },
   play() {
-    this.want = true; if (!this.ready || !this.p) return;
-    try { if (!Snd.muted) this.p.unMute(); this.p.playVideo(); } catch {}
-    setTimeout(() => { try { const st = this.p.getPlayerState(); if (st !== 1 && st !== 3 && !Snd.muted) this.showPill(); } catch {} }, 2200);
+    this.want = true; if (!this.p) this.load();
+    const a = this.p; a.muted = Snd.muted;
+    a.play().catch(() => { if (!Snd.muted) this.showPill(); });
   },
   showPill() { $('#musicPill').hidden = false; },
   hidePill() { $('#musicPill').hidden = true; },
   fallback(msg) { if (this.fell) return; this.fell = true; this.hidePill(); if (msg) toast(msg); Snd.init(); Snd.start(); },
-  mute(m) { try { if (this.p && this.p.mute) m ? this.p.mute() : this.p.unMute(); } catch {} },
-  pause(h) { try { if (this.p && this.ready && this.want && !Snd.muted) h ? this.p.pauseVideo() : this.p.playVideo(); } catch {} }
+  mute(m) { if (this.p) this.p.muted = m; },
+  pause(h) { if (this.p && this.want && !Snd.muted) { h ? this.p.pause() : this.p.play().catch(() => {}); } }
 };
-$('#musicPill').onclick = () => { try { Music.p.unMute(); Music.p.seekTo(YT_START, true); Music.p.playVideo(); } catch {} Music.hidePill(); };
+$('#musicPill').onclick = () => { try { Music.p.muted = false; Music.p.play(); } catch {} Music.hidePill(); };
 $('#sound').onclick = () => Snd.toggle();
 document.addEventListener('visibilitychange', () => { Music.pause(document.hidden); if (!Snd.c) return; document.hidden ? Snd.c.suspend() : Snd.c.resume(); });
 
