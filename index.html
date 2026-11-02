@@ -656,6 +656,9 @@ body.dm #phul{opacity:0}
       <div class="pb">
         <div class="lbl" style="margin-top:0">Passenger</div>
         <div class="nm" id="pName">Guest</div>
+        <div class="qrrow" style="margin-top:14px"><div class="qr" id="qr"></div>
+          <div class="qrtx"><b>LUCKY DRAW NO.</b><div class="val" id="pLucky" style="font:900 30px/1.1 var(--head);color:var(--gold1);margin:2px 0 4px">—</div>Pass no. <span id="pNo">DW-0000</span><br><b>📸 SCREENSHOT THIS</b> to claim your prize.</div></div>
+        <div class="lbl">Status</div><div class="val" id="pRsvp">—</div>
         <div class="g2">
           <div><div class="lbl">Date</div><div class="val" id="pDate"></div></div>
           <div><div class="lbl">Boarding</div><div class="val">8:00 PM Onwards</div></div>
@@ -667,16 +670,12 @@ body.dm #phul{opacity:0}
         </div>
         <div class="lbl">Dress Code</div><div class="val">Ethnic. Go all out 🥻</div>
         <div class="lbl">Fate</div><div class="val" id="pFate">—</div>
-        <div class="lbl">Lucky Draw No.</div><div class="val" id="pLucky">—</div>
-        <div class="lbl" style="letter-spacing:.08em;text-transform:none">📸 Screenshot this pass. You need it to claim the prize.</div>
-        <div class="lbl">Status</div><div class="val" id="pRsvp">—</div>
         <div class="lbl">Secret Mission</div>
         <div id="pMission"><button class="dec" id="decrypt">🔓 TAP TO DECRYPT</button></div>
       </div>
       <div class="perf"></div>
       <div class="ft">
-        <div class="qrrow"><div class="qr" id="qr"></div>
-          <div class="qrtx"><b>SHOW AT THE DOOR</b><br>Pass no. <span id="pNo">DW-0000</span><br>Pack: ₹50 &amp; ₹100 notes · dance shoes · zero shame.</div></div>
+        <div class="qrtx"><b>SHOW AT THE DOOR</b><br>Pack: ₹50 &amp; ₹100 notes · dance shoes · zero shame.</div>
         <a class="btn full" id="pMap" href="https://maps.app.goo.gl/VvkY1iz8Z15ZN5yT8" target="_blank" rel="noopener">📍 Take me to the venue</a>
       </div>
     </div>
