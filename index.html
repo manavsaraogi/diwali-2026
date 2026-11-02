@@ -354,10 +354,6 @@ button.dec{cursor:pointer}
 #fireTag{font-size:16px;font-weight:500;font-style:italic;color:var(--gold1);min-height:26px}
 .boom{min-height:84px;display:grid;place-items:center;font:900 22px/1.3 var(--head);white-space:pre-line;background:var(--gold);-webkit-background-clip:text;background-clip:text;color:transparent}
 .boom.cdn{font-size:54px}
-.scratch{position:relative;width:100%;height:150px;border-radius:16px;overflow:hidden;border:1px solid var(--gold2);background:radial-gradient(circle at 50% 40%,#2c1f0b,#120e08)}
-.scratch .prize{position:absolute;inset:0;display:grid;place-items:center;padding:18px;font:700 17px/1.4 var(--head);color:var(--gold1);text-align:center}
-.scratch canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair;transition:opacity 1s}
-.scratch canvas.gone{opacity:0;pointer-events:none}
 .songs{width:100%;display:flex;flex-direction:column;gap:8px;text-align:left}
 .songs div{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--line);border-radius:12px;font-size:13.5px;background:rgba(0,0,0,.25)}
 .songs div i{font-style:normal;font:700 11px var(--head);color:var(--gold2);width:22px}
@@ -717,12 +713,6 @@ body.dm #phul{opacity:0}
     </section>
 
     <section class="mod">
-      <div class="kicker">🪙 Diwali Scratch Card</div>
-      <h3>Scratch to reveal your<br>Diwali surprise</h3>
-      <div class="scratch" id="scratch"><div class="prize" id="prize"></div><canvas id="scv"></canvas></div>
-    </section>
-
-    <section class="mod">
       <div class="kicker">🎵 Guest Diwali Playlist</div>
       <div class="songs" id="songs"></div>
     </section>
@@ -805,7 +795,6 @@ const PHATAKA = {
   bomb: 'BOOM.\nYou’re invited. Obviously.',
   rocket: 'SKY’S THE LIMIT.\nThe dance floor is the minimum.'
 };
-const PRIZES = ['You get first dibs on the dance floor.', 'Congratulations. You’re buying the next round.', 'You’ve unlocked VIP access to the dessert table.'];
 
 /* =============== STATE =============== */
 const KEY = 'diwali26-passport-v2';
@@ -814,7 +803,7 @@ const store = {
   set(v) { try { localStorage.setItem(KEY, JSON.stringify(v)) } catch {} },
   clear() { try { localStorage.removeItem(KEY) } catch {} }
 };
-let S = Object.assign({ guests: '', name: '', aura: '', song: '', fate: null, mission: null, rsvp: '', party: 0, confirmed: false, prize: null, decoded: false }, store.get());
+let S = Object.assign({ guests: '', name: '', aura: '', song: '', fate: null, mission: null, rsvp: '', party: 0, confirmed: false, decoded: false }, store.get());
 const save = () => store.set(S);
 let remote = { guests: [], songs: [], taken: [] };
 
@@ -1366,32 +1355,6 @@ $$('#fire button').forEach(b => b.onclick = async () => {
   bm.className = 'boom'; phataka(b.dataset.f, r.left + r.width / 2, b.dataset.f === 'rocket' ? r.top : r.top + 10);
   await wait(250); bm.textContent = PHATAKA[b.dataset.f]; bm.classList.remove('pop'); void bm.offsetWidth; bm.classList.add('pop'); busyF = false;
 });
-/* scratch card */
-let scInit = false;
-function initScratch() {
-  const box = $('#scratch'), c = $('#scv'); if (!S.prize) { S.prize = pick(PRIZES); save(); }
-  $('#prize').textContent = S.prize;
-  const w = box.offsetWidth, h = box.offsetHeight, d = Math.min(devicePixelRatio || 1, 2);
-  c.width = w * d; c.height = h * d; const x = c.getContext('2d'); x.scale(d, d); c.classList.remove('gone');
-  const g = x.createLinearGradient(0, 0, w, h); g.addColorStop(0, '#ffe599'); g.addColorStop(.5, '#cfa043'); g.addColorStop(1, '#996e1e');
-  x.fillStyle = g; x.fillRect(0, 0, w, h);
-  x.globalAlpha = .25; for (let i = 0; i < 260; i++) { x.fillStyle = Math.random() < .5 ? '#fff' : '#5a3b08'; x.fillRect(Math.random() * w, Math.random() * h, 2, 2); } x.globalAlpha = 1;
-  x.fillStyle = '#4a3208'; x.font = '700 16px Cinzel,serif'; x.textAlign = 'center'; x.fillText('✦ SCRATCH TO REVEAL ✦', w / 2, h / 2 + 5);
-  x.globalCompositeOperation = 'destination-out';
-  let down = false, moves = 0, done = false;
-  const at = e => { const r = c.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
-  const scratch = e => {
-    if (!down || done) return; const [px, py] = at(e); x.beginPath(); x.arc(px, py, 22, 0, 6.28); x.fill();
-    if (++moves % 8 === 0) {
-      const dat = x.getImageData(0, 0, c.width, c.height).data; let clear = 0, tot = 0;
-      for (let i = 3; i < dat.length; i += 64) { tot++; if (dat[i] === 0) clear++; }
-      if (clear / tot > .5) { done = true; c.classList.add('gone'); sparkBurst(60, W / 2, H / 2); show(1500, 300); Snd.chime(); }
-    }
-  };
-  if (!scInit) { scInit = true; }
-  c.onpointerdown = e => { down = true; c.setPointerCapture(e.pointerId); scratch(e); };
-  c.onpointermove = scratch; c.onpointerup = c.onpointercancel = () => { down = false; };
-}
 $('#share').onclick = async () => {
   const text = `${S.name || 'I'} is going to Diwali 2026: Lights & Chaos 🪔 ${dateLong()}, 8:00 PM onwards at ${VENUE}. Aura: ${S.aura || 'wild card'}.`;
   try { if (navigator.share) await navigator.share({ title: 'Diwali 2026: Lights & Chaos', text }); else { await navigator.clipboard.writeText(text); toast('Copied to clipboard ✨'); } } catch {}
@@ -1408,7 +1371,6 @@ function enterFinal() {
   $('#waBtn').href = waLink();
   renderPass(); renderWall(); renderSongs();
   if (!finalInit) { finalInit = true; renderCal(); }
-  setTimeout(initScratch, 120);
   show(5200, 340); Snd.chime();
 }
 
